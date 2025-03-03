@@ -1,35 +1,49 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react';
 
-function App() {
-  const [count, setCount] = useState(0)
+const API_URL = 'https://api.quotable.io/quotes/random';
+
+const App = () => {
+  const [quotes, setQuotes] = useState([]);
+  const getQuote = async () => {
+    const response = await fetch(API_URL);
+    const data = await response.json();
+    setQuotes(data);
+    console.log(data, data.author);
+  };
+  useEffect(() => {
+    getQuote();
+  }, []);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className='quote-container'>
+        <wrapper id='quote-box'>
+          {quotes.map((quote) => (
+            <>
+              <p key={quote.id} className='text' id='text'>
+                {quote.content}
+              </p>
+              <p key={quote.id} className='author' id='author'>
+                {quote.author}
+              </p>
+            </>
+          ))}
+          <div className='buttons'>
+            <button id='new-quote' onClick={setQuotes}>
+              New Quote
+            </button>
+            <a
+              id='tweet-quote'
+              href='https://twitter.com/intent/tweet'
+              target='_blank'
+            >
+              <button>Tweet Quote</button>
+            </a>
+          </div>
+        </wrapper>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;
