@@ -1,49 +1,83 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const API_URL = 'https://api.quotable.io/quotes/random';
+function QuoteMachine() {
+  const [quote, setQuote] = useState('');
+  const [author, setAuthor] = useState('');
 
-const App = () => {
-  const [quotes, setQuotes] = useState([]);
-  const getQuote = async () => {
-    const response = await fetch(API_URL);
-    const data = await response.json();
-    setQuotes(data);
-    console.log(data, data.author);
-  };
   useEffect(() => {
-    getQuote();
+    fetchNewQuote();
   }, []);
 
-  return (
-    <>
-      <div className='quote-container'>
-        <wrapper id='quote-box'>
-          {quotes.map((quote) => (
-            <>
-              <p key={quote.id} className='text' id='text'>
-                {quote.content}
-              </p>
-              <p key={quote.id} className='author' id='author'>
-                {quote.author}
-              </p>
-            </>
-          ))}
-          <div className='buttons'>
-            <button id='new-quote' onClick={setQuotes}>
-              New Quote
-            </button>
-            <a
-              id='tweet-quote'
-              href='https://twitter.com/intent/tweet'
-              target='_blank'
-            >
-              <button>Tweet Quote</button>
-            </a>
-          </div>
-        </wrapper>
-      </div>
-    </>
-  );
-};
+  const fetchNewQuote = async () => {
+    try {
+      const response = await fetch('https://api.quotable.io/random');
+      const data = await response.json();
+      setQuote(data.content);
+      setAuthor(data.author);
+    } catch (error) {
+      console.error('Error fetching quote:', error);
+      setQuote('Failed to fetch quote.');
+      setAuthor('Unknown');
+    }
+  };
 
-export default App;
+  const tweetQuote = () => {
+    window.open(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+        `"${quote}" - ${author}`
+      )}`,
+      '_blank'
+    );
+  };
+
+  return (
+    <div
+      id='quote-box'
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+      }}
+    >
+      <div
+        style={{
+          width: '500px',
+          padding: '20px',
+          border: '1px solid #ccc',
+          borderRadius: '5px',
+        }}
+      >
+        <div id='text'>{quote}</div>
+        <div id='author'>- {author}</div>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginTop: '20px',
+          }}
+        >
+          <button id='new-quote' onClick={fetchNewQuote}>
+            New Quote
+          </button>
+          <a
+            id='tweet-quote'
+            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+              `"${quote}" - ${author}`
+            )}`}
+            target='_blank'
+            rel='noopener noreferrer'
+            onClick={(e) => {
+              e.preventDefault(); // Prevent default link behavior
+              tweetQuote(); // Call the tweetQuote function
+            }}
+          >
+            Tweet Quote
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default QuoteMachine;
